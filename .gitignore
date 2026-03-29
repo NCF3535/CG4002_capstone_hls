@@ -1,16 +1,27 @@
+#Vivado generated outputs
 Pickleball_vivado/*.cache/
 Pickleball_vivado/*.gen/
 Pickleball_vivado/*.ip_user_files/
 Pickleball_vivado/*.runs/
 Pickleball_vivado/*.sim/
+Pickleball_vivado/*.hw/
 Pickleball_vivado/ip_upgrade.log
 Pickleball_vivado/*.srcs/sources_1/bd/design_1/ip/
 Pickleball_vivado/*.srcs/sources_1/bd/design_1/ui/
 Pickleball_vivado/*.srcs/sources_1/imports/
+Pickleball_vivado/*.srcs/utils_1/
 
+#Vitis HLS generated outputs
+pickleball_hls/.apc/
+pickleball_hls/.vitis_hls_log_all.xml
+pickleball_hls/.settings/
 pickleball_hls/solution1/.autopilot/
-pickleball_hls/solution1/csim/build/
+pickleball_hls/solution1/.debug/
+pickleball_hls/solution1/.tcls/
+pickleball_hls/solution1/csim/
 pickleball_hls/solution1/impl/
 pickleball_hls/solution1/syn/
 pickleball_hls/solution1/solution1.log
+pickleball_hls/solution1/solution1_data.json
+pickleball_hls/solution1/solution1.aps
 vitis_hls.log
