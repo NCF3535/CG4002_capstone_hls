@@ -1,5 +1,3 @@
-// PickleballNet HLS C-Simulation Testbench (INT8)
-// Validates HLS output against quantized PyTorch golden reference.
 
 #include "pickleball_model.h"
 #include "weights.h"
@@ -48,21 +46,17 @@ int main() {
         hls::stream<axis_pkt_t> in_stream("input");
         hls::stream<axis_pkt_t> out_stream("output");
 
-        // Feed raw input
         for (int i = 0; i < IN_DIM; i++) {
             push_float(in_stream, test_inputs[t][i], (i == IN_DIM - 1));
         }
 
-        // Run HLS kernel
         pb_predict(in_stream, out_stream);
 
-        // Read outputs
         float reg_result[OUT_REG];
         float cls_result[OUT_CLS];
         for (int i = 0; i < OUT_REG; i++) reg_result[i] = pop_float(out_stream);
         for (int i = 0; i < OUT_CLS; i++) cls_result[i] = pop_float(out_stream);
 
-        // Argmax
         int pred_cls = 0;
         float max_logit = cls_result[0];
         for (int i = 1; i < OUT_CLS; i++) {
@@ -72,7 +66,6 @@ int main() {
             }
         }
 
-        // Compare with golden reference
         float reg_mse = 0.0f;
         for (int i = 0; i < OUT_REG; i++) {
             float diff = reg_result[i] - expected_reg[t][i];
@@ -90,7 +83,6 @@ int main() {
         total_cls_mse += cls_mse;
 
         bool cls_matches_golden = (pred_cls == expected_pred_cls[t]);
-        // Tolerance for int8 FP32 rounding diffs
         bool reg_matches_golden = (reg_mse < 0.01f);
         bool both_match = cls_matches_golden && reg_matches_golden;
 

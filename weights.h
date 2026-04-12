@@ -1,13 +1,13 @@
 #ifndef WEIGHTS_H
 #define WEIGHTS_H
 
-// Auto-generated INT8-quantized weights (BN fused)
-// Regenerate with: python export_weights_int8.py
-// 2 hidden layers, 512 units, ReLU6
-// 530,432 int8 weight params, 4x compression vs float32
-// IN=6, HIDDEN=512, HEAD=256, REG=6, CLS=6
 
-// Input scaler: x_norm = (x - mean) / scale
+
+
+
+
+
+
 static const float x_scaler_mean[6] = {
     0.00698801f, 2.00192952f, 0.87968391f, -0.00624805f, 9.91757488f, 4.24475098f
 };
@@ -15,7 +15,7 @@ static const float x_scaler_scale[6] = {
     2.02250266f, 2.30549335f, 0.25522858f, 6.01780319f, 4.40562296f, 3.82923365f
 };
 
-// Output scaler (inverse): y_real = y_norm * scale + mean
+
 static const float y_scaler_mean[6] = {
     0.00851729f, 6.58881426f, 1.16638708f, -0.01858158f, -6.23933268f, 1.57972634f
 };
@@ -23,7 +23,7 @@ static const float y_scaler_scale[6] = {
     1.68241847f, 1.83156240f, 0.22271234f, 5.40507984f, 5.24036264f, 2.70861316f
 };
 
-// Per-tensor quantization scales: W_float = W_int8 * qscale
+
 static const float trunk_0_qscale = 0.0072245970f;
 static const float trunk_1_qscale = 0.0098390877f;
 static const float reg_head_0_qscale = 0.0142104737f;
@@ -31,7 +31,7 @@ static const float reg_head_1_qscale = 0.0040945332f;
 static const float cls_head_0_qscale = 0.0130116455f;
 static const float cls_head_1_qscale = 0.0176971983f;
 
-// trunk_0: [512 x 6] int8
+
 static const signed char trunk_0_weight_q[3072] = {
       42,   31,   11,   49,   14,   40,  -43,   20,   35,  -36,   53,   43,   35,   22,    5,    4,
       48,   20,  -12,    0,  -12,   -3,  -32,   54,  -33,  -32,  -26,  -25,   -8, -107,   47,  -24,
@@ -293,7 +293,7 @@ static const float trunk_0_bias[512] = {
     -0.51952499f, -0.38350371f, 0.20508462f, 0.10450638f, -0.33222243f, -0.56504446f, 0.02686903f, 0.57660633f
 };
 
-// trunk_1: [512 x 512] int8
+
 static const signed char trunk_1_weight_q[262144] = {
       15,    5,  -20,  -33,   20,    5,   -7,  -13,    3,    0,    7,    5,   11,   -1,   -7,    1,
       15,    9,    9,    4,    7,  -10,   12,    2,   -1,    5,    0,  -10,    5,   10,  -18,   17,
@@ -16747,7 +16747,7 @@ static const float trunk_1_bias[512] = {
     0.27804554f, 0.00169594f, 0.00427758f, 0.06743659f, -0.08328643f, -0.04895196f, -0.06574297f, -0.07659996f
 };
 
-// reg_head_0: [256 x 512] int8
+
 static const signed char reg_head_0_weight_q[131072] = {
       -3,    0,    1,    3,   -5,    2,    1,   -2,    0,   -3,   -2,   -3,   -1,   -2,    1,    1,
        1,   -2,   -3,    1,    0,   -3,   -1,   -3,   -3,   -1,   -4,    0,    0,    1,    0,   -5,
@@ -24977,7 +24977,7 @@ static const float reg_head_0_bias[256] = {
     -0.04889248f, -0.00046911f, 0.10621601f, 0.18168986f, -0.02900599f, 0.08177168f, 0.11899526f, -0.02343674f
 };
 
-// reg_head_1: [6 x 256] int8
+
 static const signed char reg_head_1_weight_q[1536] = {
       -4,   10,    3,    2,   -2,    1,    3,    1,    2,   -4,   -3,   10,    3,   -3,    0,   19,
        7,    4,   15,    0,   13,    4,   10,   -5,   -1,   -8,  -17,    7,    2,  -10,   33,   -1,
@@ -25080,7 +25080,7 @@ static const float reg_head_1_bias[6] = {
     -0.03599260f, -0.36785269f, 0.07114213f, -0.02108772f, 0.12086961f, -0.25491646f
 };
 
-// cls_head_0: [256 x 512] int8
+
 static const signed char cls_head_0_weight_q[131072] = {
        0,    2,    1,    2,   -4,    2,    2,    1,   -4,    3,   -4,   -2,    0,   10,   -3,  -19,
       13,   -5,   -5,    0,    3,   -1,    0,  -21,    9,  -39,    8,    9,    3,    3,  -26,   -3,
@@ -33310,7 +33310,7 @@ static const float cls_head_0_bias[256] = {
     0.11731914f, 0.21433906f, 0.06060258f, 0.35920084f, 0.18830770f, -0.00028443f, -0.00944898f, -0.17787464f
 };
 
-// cls_head_1: [6 x 256] int8
+
 static const signed char cls_head_1_weight_q[1536] = {
        4,    0,    3,    3,   -3,    5,   23,    6,  -13,  -17,    1,    5,    4,  -16,    3,   13,
       12,    7,    8,    6,   -2,    4,  -11,   -3,  -11,  -24,   -1,    3,  -24,   -4,    1,    9,
@@ -33413,4 +33413,4 @@ static const float cls_head_1_bias[6] = {
     0.04736797f, -0.15375477f, 0.11279120f, 0.01892446f, -0.07995490f, 0.00137235f
 };
 
-#endif // WEIGHTS_H
+#endif 

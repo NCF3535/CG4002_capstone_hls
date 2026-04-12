@@ -1,24 +1,22 @@
-// PickleballNet Vitis HLS (INT8 quantized, AXI-Stream)
-// Input: 6 x float32 (raw) -> Output: 12 x float32 (6 reg + 6 cls logits)
-// BN fused at export. Weights quantized to int8.
-//
-// Pipeline notes:
-//   LAYER0 (6->512): outer loop pipelined II=1, inner loop fully unrolled.
-//     6 parallel fmuls + adder tree -> no loop-carried dependency -> II=1 clean.
-//   LAYER1 + HEAD_L0 (512->512, 512->256): 16 independent partial accumulators
-//     (s0..s15), j+=16, II=4. Float fadd latency ~11 cycles; with 16 chains
-//     HLS achieves II=4 cleanly. cyclic=16 BRAM provides 16 concurrent reads.
-//   Heads: DATAFLOW parallelism via run_heads(). REG and CLS pipelines execute
-//     concurrently after LAYER1 completes. Each uses separate reg_buf/cls_buf
-//     (required for HLS DATAFLOW fan-out of h_b).
-//   HEAD_L1 (256->6): 16 accumulators II=4, only 16 inner iterations -- fine.
-//
-// Memory:
-//   BRAM (rom_2p, cyclic=16): trunk_1, reg/cls_head_0 weights
-//   LUTRAM: trunk_0, head_1 weights, biases, scalers
-//   h_a/h_b: cyclic=16, impl chosen by HLS (FFs after partition)
-//   reg_buf/cls_buf: cyclic=16 inside run_heads
-//   Regs (complete partition): input_raw, input_scaled, reg_out, cls_out
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "pickleball_model.h"
 #include "weights.h"
@@ -35,15 +33,15 @@ static inline float relu6(float x) {
     return x;
 }
 
-// Canonical DATAFLOW requires only variable declarations and function calls at top level.
-// REG and CLS heads are split into dedicated functions so run_heads() is purely function calls.
+
+
 
 static void run_reg_head(float h_b[HIDDEN], float reg_out[OUT_REG]) {
     #pragma HLS ARRAY_PARTITION variable=h_b cyclic factor=16
     float reg_buf[HEAD_HIDDEN];
     #pragma HLS ARRAY_PARTITION variable=reg_buf cyclic factor=16
 
-    // REG Head Layer 0 (512 -> 256), 16 accumulators II=4
+    
     REG_HEAD_L0:
     for (int i = 0; i < HEAD_HIDDEN; i++) {
         #pragma HLS LOOP_FLATTEN off
@@ -72,7 +70,7 @@ static void run_reg_head(float h_b[HIDDEN], float reg_out[OUT_REG]) {
         reg_buf[i] = relu6((s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+s14+s15) * reg_head_0_qscale + reg_head_0_bias[i]);
     }
 
-    // REG Head Layer 1 (256 -> 6) + inverse scaler, 16 accumulators II=4
+    
     REG_HEAD_L1:
     for (int i = 0; i < OUT_REG; i++) {
         #pragma HLS LOOP_FLATTEN off
@@ -108,7 +106,7 @@ static void run_cls_head(float h_b[HIDDEN], float cls_out[OUT_CLS]) {
     float cls_buf[HEAD_HIDDEN];
     #pragma HLS ARRAY_PARTITION variable=cls_buf cyclic factor=16
 
-    // CLS Head Layer 0 (512 -> 256), 16 accumulators II=4
+    
     CLS_HEAD_L0:
     for (int i = 0; i < HEAD_HIDDEN; i++) {
         #pragma HLS LOOP_FLATTEN off
@@ -137,7 +135,7 @@ static void run_cls_head(float h_b[HIDDEN], float cls_out[OUT_CLS]) {
         cls_buf[i] = relu6((s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+s14+s15) * cls_head_0_qscale + cls_head_0_bias[i]);
     }
 
-    // CLS Head Layer 1 (256 -> 6), 16 accumulators II=4
+    
     CLS_HEAD_L1:
     for (int i = 0; i < OUT_CLS; i++) {
         #pragma HLS LOOP_FLATTEN off
@@ -167,7 +165,7 @@ static void run_cls_head(float h_b[HIDDEN], float cls_out[OUT_CLS]) {
     }
 }
 
-// Canonical DATAFLOW wrapper: only function calls at top level -> no HLS 214-114 warnings.
+
 static void run_heads(
     float h_b[HIDDEN],
     float reg_out[OUT_REG],
@@ -186,7 +184,7 @@ void pb_predict(
     #pragma HLS INTERFACE axis port=output_stream
     #pragma HLS INTERFACE s_axilite port=return bundle=control
 
-    // Registers (fully partitioned -> flip-flops)
+    
     float input_raw[IN_DIM];
     float input_scaled[IN_DIM];
     float reg_out[OUT_REG];
@@ -196,15 +194,15 @@ void pb_predict(
     #pragma HLS ARRAY_PARTITION variable=reg_out      complete
     #pragma HLS ARRAY_PARTITION variable=cls_out      complete
 
-    // Activation buffers: cyclic=16 to support 16 simultaneous reads per MAC iter.
-    // After partition into 16 banks each bank is tiny -> HLS uses FFs.
+    
+    
     float h_a[HIDDEN];
     float h_b[HIDDEN];
     #pragma HLS ARRAY_PARTITION variable=h_a cyclic factor=16
     #pragma HLS ARRAY_PARTITION variable=h_b cyclic factor=16
 
-    // Large weights -> BRAM rom_2p, cyclic=16
-    // 16 banks -> 16 concurrent reads per cycle to match s0..s15 partial sums.
+    
+    
     #pragma HLS BIND_STORAGE variable=trunk_1_weight_q    type=rom_2p impl=bram
     #pragma HLS BIND_STORAGE variable=reg_head_0_weight_q type=rom_2p impl=bram
     #pragma HLS BIND_STORAGE variable=cls_head_0_weight_q type=rom_2p impl=bram
@@ -212,7 +210,7 @@ void pb_predict(
     #pragma HLS ARRAY_PARTITION variable=reg_head_0_weight_q cyclic factor=16
     #pragma HLS ARRAY_PARTITION variable=cls_head_0_weight_q cyclic factor=16
 
-    // Small weights -> LUTRAM
+    
     #pragma HLS BIND_STORAGE variable=trunk_0_weight_q    type=rom_1p impl=lutram
     #pragma HLS BIND_STORAGE variable=reg_head_1_weight_q type=rom_1p impl=lutram
     #pragma HLS BIND_STORAGE variable=cls_head_1_weight_q type=rom_1p impl=lutram
@@ -231,7 +229,7 @@ void pb_predict(
     #pragma HLS BIND_STORAGE variable=y_scaler_mean   type=rom_1p impl=lutram
     #pragma HLS BIND_STORAGE variable=y_scaler_scale  type=rom_1p impl=lutram
 
-    // STAGE 1: AXI-Stream input
+    
     READ_INPUT:
     for (int i = 0; i < IN_DIM; i++) {
         #pragma HLS PIPELINE II=1
@@ -241,17 +239,17 @@ void pb_predict(
         input_raw[i] = conv.f;
     }
 
-    // STAGE 2: StandardScaler
+    
     SCALE_INPUT:
     for (int i = 0; i < IN_DIM; i++) {
         #pragma HLS PIPELINE II=1
         input_scaled[i] = (input_raw[i] - x_scaler_mean[i]) / x_scaler_scale[i];
     }
 
-    // STAGE 3: Trunk Layer 0 (6 -> 512)
-    // Outer loop pipelined II=1, inner loop fully unrolled (IN_DIM=6).
-    // No loop-carried accumulator dependency -> II=1 achievable.
-    // 6 parallel fmuls + adder-tree reduction, critical path < 10 ns.
+    
+    
+    
+    
     LAYER0:
     for (int i = 0; i < HIDDEN; i++) {
         #pragma HLS PIPELINE
@@ -264,10 +262,10 @@ void pb_predict(
         h_a[i] = relu6(sum * trunk_0_qscale + trunk_0_bias[i]);
     }
 
-    // STAGE 4: Trunk Layer 1 (512 -> 512)
-    // 16 independent partial accumulators (s0..s15), j+=16: 32 iterations.
-    // II=4; cyclic=16 BRAM provides 16 concurrent reads per cycle.
-    // Float fadd latency ~11 cycles limits minimum achievable II to ~4 with 16 chains.
+    
+    
+    
+    
     LAYER1:
     for (int i = 0; i < HIDDEN; i++) {
         #pragma HLS LOOP_FLATTEN off
@@ -296,10 +294,10 @@ void pb_predict(
         h_b[i] = relu6((s0+s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+s14+s15) * trunk_1_qscale + trunk_1_bias[i]);
     }
 
-    // STAGE 5+6: REG and CLS heads in parallel via DATAFLOW
+    
     run_heads(h_b, reg_out, cls_out);
 
-    // STAGE 7: AXI-Stream output
+    
     WRITE_REG:
     for (int i = 0; i < OUT_REG; i++) {
         #pragma HLS PIPELINE II=1
